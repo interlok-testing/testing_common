@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group = 'com.adaptris'
+version = '0.1'
+
+apply from: "common.gradle"
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}

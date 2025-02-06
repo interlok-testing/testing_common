@@ -1,0 +1,35 @@
+ext {
+    interlokParentGradle = "https://raw.githubusercontent.com/adaptris/interlok-build-parent/main/v5/build.gradle"
+    interlokVersion = '5.0-SNAPSHOT'
+    // Include the WAR file since by default it is excluded.
+    includeWar='true'
+    junitJupiterVersion = '5.11.4'
+    apacheHttpComponentsVersion = '5.3.3'
+    apacheHttpComponentsClientVersion = '5.1.4'
+}
+
+allprojects {
+    apply from: "${interlokParentGradle}"
+}
+
+dependencies {
+    implementation ("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+    implementation ("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
+    implementation ("org.apache.httpcomponents.core5:httpcore5:$apacheHttpComponentsVersion")
+    implementation ("org.apache.httpcomponents.client5:httpclient5:$apacheHttpComponentsClientVersion")
+    implementation ("org.apache.httpcomponents.client5:httpclient5-testing:$apacheHttpComponentsClientVersion")
+    implementation fileTree(dir: "$buildDir/distribution/lib", include: ['*.jar'])
+}
+
+repositories {
+    mavenLocal()
+}
+
+def functionalTest = tasks.register('functionalTest', Test) {
+    useJUnitPlatform()
+    if (interlokServiceTest) interlokServiceTest.enabled = false
+    if (interlokServiceTestReport) interlokServiceTestReport.enabled = false
+    if (interlokVerifyConfigCheck) interlokVerifyConfigCheck.enabled = false
+    dependsOn tasks.named('build')
+    workingDir = file("$buildDir/distribution")
+}
