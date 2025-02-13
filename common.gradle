@@ -21,6 +21,7 @@ dependencies {
     implementation ("org.apache.httpcomponents.client5:httpclient5-testing:$apacheHttpComponentsClientVersion")
     implementation "org.testcontainers:testcontainers:$testContainersVersion"
     implementation "org.testcontainers:junit-jupiter:$testContainersVersion"
+    implementation "com.adaptris:interlok-service-tester:$interlokVersion"
     implementation fileTree(dir: "$buildDir/distribution/lib", include: ['*.jar'])
 }
 
@@ -40,4 +41,12 @@ def functionalTest = tasks.register('functionalTest', Test) {
     dependsOn tasks.named('installDist')
     mustRunAfter tasks.named('installDist')
     workingDir = file("$buildDir/distribution")
+
+    def inputFile = new File(interlokServiceTestDefinition)
+    if (inputFile.exists()) {
+        if (interlokServiceTest) interlokServiceTest.enabled = true
+        if (interlokServiceTestReport) interlokServiceTestReport.enabled = true
+        if (interlokVerifyConfigCheck) interlokVerifyConfigCheck.enabled = true
+        dependsOn tasks.named("interlokServiceTest")
+    }
 }
