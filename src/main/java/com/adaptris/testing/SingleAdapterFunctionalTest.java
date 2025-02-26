@@ -75,17 +75,19 @@ public class SingleAdapterFunctionalTest extends AbstractAdapterFunctionalTest {
         }
 
         File variablesFile = new File("./config/variables.properties");
-        Properties variablesProperties = new Properties();
-        try (InputStream is = new FileInputStream(variablesFile)) {
-            variablesProperties.load(is);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        variablesProperties.put("sysprop.jetty.http.port", String.valueOf(serverPort));
-        try (OutputStream os = new FileOutputStream(variablesFile)) {
-            variablesProperties.store(os, null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (variablesFile.exists()) {
+            Properties variablesProperties = new Properties();
+            try (InputStream is = new FileInputStream(variablesFile)) {
+                variablesProperties.load(is);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            variablesProperties.put("sysprop.jetty.http.port", String.valueOf(serverPort));
+            try (OutputStream os = new FileOutputStream(variablesFile)) {
+                variablesProperties.store(os, null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
