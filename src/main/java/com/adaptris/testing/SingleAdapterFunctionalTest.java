@@ -67,9 +67,15 @@ public class SingleAdapterFunctionalTest extends AbstractAdapterFunctionalTest {
         Properties bootstrapProperties = new Properties();
         try (InputStream is = new FileInputStream(bootstrapFile)) {
             bootstrapProperties.load(is);
+            customiseBootstrapProperties(bootstrapProperties);
             String jmxServiceUrlStr = bootstrapProperties.getProperty("jmxserviceurl", null);
             assert jmxServiceUrlStr != null : "Bootstrap file must have jmxserviceurl property";
             jmxServiceUrl = new JMXServiceURL(jmxServiceUrlStr);
+            try (OutputStream os = new FileOutputStream(bootstrapFile)) {
+                bootstrapProperties.store(os, null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -82,13 +88,21 @@ public class SingleAdapterFunctionalTest extends AbstractAdapterFunctionalTest {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            variablesProperties.put("sysprop.jetty.http.port", String.valueOf(serverPort));
+            customiseVariablesIfExists(variablesProperties);
             try (OutputStream os = new FileOutputStream(variablesFile)) {
                 variablesProperties.store(os, null);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    protected void customiseBootstrapProperties(Properties props) {
+        props.put("webServerPort", String.valueOf(serverPort));
+    }
+
+    protected void customiseVariablesIfExists(Properties props) {
+        props.put("sysprop.jetty.http.port", String.valueOf(serverPort));
     }
 
     protected void withReservedSocket(Consumer<ServerSocket> reservedFn, Callable<Void> afterClosedFn) throws Exception {
