@@ -7,7 +7,10 @@ ext {
     apacheHttpComponentsVersion = '5.3.3'
     apacheHttpComponentsClientVersion = '5.1.4'
     testContainersVersion = "1.20.4"
+    interlokLicenseGeneratorVersion = "0.1"
 }
+def interlokLicenseGeneratorCloneDir = "${buildDir}/interlok-license-generator"
+
 
 allprojects {
     apply from: "${interlokParentGradle}"
@@ -22,6 +25,7 @@ dependencies {
     implementation "org.testcontainers:testcontainers:$testContainersVersion"
     implementation "org.testcontainers:junit-jupiter:$testContainersVersion"
     implementation "com.adaptris:interlok-service-tester:$interlokVersion"
+    implementation group: "com.adaptris.license", name: "interlok-license-generator", version: "0.1"
     implementation fileTree(dir: "$buildDir/distribution/lib", include: ['*.jar'])
 }
 
@@ -32,6 +36,26 @@ repositories {
 test {
     useJUnitPlatform()
 }
+
+tasks.named("assemble") {
+    dependsOn("buildLicenseGeneratorIfNeeded")
+}
+
+def buildLicenseGeneratorIfNeeded = tasks.register("buildLicenseGeneratorIfNeeded") {
+    def testConfigs = configurations.findAll {
+        ["testRuntime", "testImplementation"].contains(it.name)
+    }
+    if (testConfigs.allDependencies.flatten().find { it.group == 'com.adaptris.license' && it.name == 'interlok-license-generator'}) {
+        it.finalizedBy(["cloneLicenseGeneratorRepo", "buildLicenseGenerator"])
+    }
+}
+
+def buildLicenseGenerator = tasks.register("buildLicenseGenerator", GradleBuild) {
+    dir = new File(interlokLicenseGeneratorCloneDir)
+    tasks = ["publishToMavenLocal"]
+    mustRunAfter("cloneLicenseGeneratorRepo")
+}
+
 
 def functionalTest = tasks.register('functionalTest', Test) {
     useJUnitPlatform()

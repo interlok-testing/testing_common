@@ -16,14 +16,12 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ServerSocket;
+import java.nio.file.*;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -33,7 +31,7 @@ import java.util.function.Consumer;
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SingleAdapterFunctionalTest extends AbstractAdapterFunctionalTest {
-
+    protected WatchService watchService;
     protected CloseableHttpClient client = HttpClients.createDefault();
     protected Integer serverPort;
     protected JMXServiceURL jmxServiceUrl;
@@ -50,6 +48,7 @@ public class SingleAdapterFunctionalTest extends AbstractAdapterFunctionalTest {
 
     @BeforeAll
     public void setup() throws Exception {
+        watchService = FileSystems.getDefault().newWatchService();
         withReservedSocket(this::setupAdapter, this::launchAdapter);
         connectJMX();
         waitForAdapterStarted();
@@ -149,5 +148,10 @@ public class SingleAdapterFunctionalTest extends AbstractAdapterFunctionalTest {
                 jmxConnector.close();
             }
         }
+    }
+
+    protected WatchKey waitForFileEvent(Path path, long timeOutMs, WatchEvent.Kind<?>... eventKinds) throws Exception {
+        path.register(watchService, eventKinds);
+        return watchService.poll(timeOutMs, TimeUnit.MILLISECONDS);
     }
 }
