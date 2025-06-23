@@ -1,6 +1,6 @@
 ext {
     interlokParentGradle = "https://raw.githubusercontent.com/adaptris/interlok-build-parent/main/v5/build.gradle"
-    interlokVersion = '5.0-SNAPSHOT'
+    interlokVersion = '5.0.5B1-RELEASE'
     // Include the WAR file since by default it is excluded.
     includeWar='true'
     junitJupiterVersion = '5.11.4'
@@ -45,15 +45,21 @@ def buildLicenseGeneratorIfNeeded = tasks.register("buildLicenseGeneratorIfNeede
     def testConfigs = configurations.findAll {
         ["testRuntime", "testImplementation"].contains(it.name)
     }
-    if (testConfigs.allDependencies.flatten().find { it.group == 'com.adaptris.license' && it.name == 'interlok-license-generator'}) {
-        it.finalizedBy(["cloneLicenseGeneratorRepo", "buildLicenseGenerator"])
-    }
+//    if (project.tasks.named('cloneLicenseGeneratorRepo').present) {
+//        if (testConfigs.allDependencies.flatten().find { it.group == 'com.adaptris.license' && it.name == 'interlok-license-generator'}) {
+//            it.finalizedBy(["cloneLicenseGeneratorRepo", "buildLicenseGenerator"])
+//        }
+//    } else {
+        enabled = false
+//    }
 }
 
 def buildLicenseGenerator = tasks.register("buildLicenseGenerator", GradleBuild) {
     dir = new File(interlokLicenseGeneratorCloneDir)
     tasks = ["publishToMavenLocal"]
-    mustRunAfter("cloneLicenseGeneratorRepo")
+//    if (project.tasks.named('cloneLicenseGeneratorRepo').present) {
+//        mustRunAfter("cloneLicenseGeneratorRepo")
+//    }
 }
 
 
