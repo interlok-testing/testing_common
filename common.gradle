@@ -9,8 +9,6 @@ ext {
     testContainersVersion = "1.20.4"
     interlokLicenseGeneratorVersion = "0.1"
 }
-def interlokLicenseGeneratorCloneDir = "${buildDir}/interlok-license-generator"
-
 
 allprojects {
     apply from: "${interlokParentGradle}"
@@ -25,7 +23,7 @@ dependencies {
     implementation "org.testcontainers:testcontainers:$testContainersVersion"
     implementation "org.testcontainers:junit-jupiter:$testContainersVersion"
     implementation "com.adaptris:interlok-service-tester:$interlokVersion"
-    implementation group: "com.adaptris.license", name: "interlok-license-generator", version: "0.1"
+    implementation group: "com.adaptris.license", name: "interlok-license-generator", version: "$interlokLicenseGeneratorVersion"
     implementation fileTree(dir: "$buildDir/distribution/lib", include: ['*.jar'])
 }
 
@@ -37,32 +35,6 @@ test {
     useJUnitPlatform()
 }
 
-tasks.named("assemble") {
-    dependsOn("buildLicenseGeneratorIfNeeded")
-}
-
-def buildLicenseGeneratorIfNeeded = tasks.register("buildLicenseGeneratorIfNeeded") {
-    def testConfigs = configurations.findAll {
-        ["testRuntime", "testImplementation"].contains(it.name)
-    }
-//    if (project.tasks.named('cloneLicenseGeneratorRepo').present) {
-//        if (testConfigs.allDependencies.flatten().find { it.group == 'com.adaptris.license' && it.name == 'interlok-license-generator'}) {
-//            it.finalizedBy(["cloneLicenseGeneratorRepo", "buildLicenseGenerator"])
-//        }
-//    } else {
-        enabled = false
-//    }
-}
-
-def buildLicenseGenerator = tasks.register("buildLicenseGenerator", GradleBuild) {
-    dir = new File(interlokLicenseGeneratorCloneDir)
-    tasks = ["publishToMavenLocal"]
-//    if (project.tasks.named('cloneLicenseGeneratorRepo').present) {
-//        mustRunAfter("cloneLicenseGeneratorRepo")
-//    }
-}
-
-
 def functionalTest = tasks.register('functionalTest', Test) {
     useJUnitPlatform()
     if (interlokServiceTest) interlokServiceTest.enabled = false
@@ -70,6 +42,8 @@ def functionalTest = tasks.register('functionalTest', Test) {
     if (interlokVerifyConfigCheck) interlokVerifyConfigCheck.enabled = false
     dependsOn tasks.named('installDist')
     mustRunAfter tasks.named('installDist')
+    dependsOn tasks.named('assemble')
+    mustRunAfter tasks.named('assemble')
     workingDir = file("$buildDir/distribution")
 
     def inputFile = new File(interlokServiceTestDefinition)
