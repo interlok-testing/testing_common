@@ -1,11 +1,13 @@
 ext {
     interlokParentGradle = "https://raw.githubusercontent.com/adaptris/interlok-build-parent/main/v5/build.gradle"
-    interlokVersion = '5.0-SNAPSHOT'
+    interlokVersion = '5.0.5B1-RELEASE'
     // Include the WAR file since by default it is excluded.
     includeWar='true'
     junitJupiterVersion = '5.11.4'
     apacheHttpComponentsVersion = '5.3.3'
     apacheHttpComponentsClientVersion = '5.1.4'
+    testContainersVersion = "1.20.4"
+    interlokLicenseGeneratorVersion = "0.1"
 }
 
 allprojects {
@@ -18,11 +20,19 @@ dependencies {
     implementation ("org.apache.httpcomponents.core5:httpcore5:$apacheHttpComponentsVersion")
     implementation ("org.apache.httpcomponents.client5:httpclient5:$apacheHttpComponentsClientVersion")
     implementation ("org.apache.httpcomponents.client5:httpclient5-testing:$apacheHttpComponentsClientVersion")
+    implementation "org.testcontainers:testcontainers:$testContainersVersion"
+    implementation "org.testcontainers:junit-jupiter:$testContainersVersion"
+    implementation "com.adaptris:interlok-service-tester:$interlokVersion"
+    implementation group: "com.adaptris.license", name: "interlok-license-generator", version: "$interlokLicenseGeneratorVersion"
     implementation fileTree(dir: "$buildDir/distribution/lib", include: ['*.jar'])
 }
 
 repositories {
     mavenLocal()
+}
+
+test {
+    useJUnitPlatform()
 }
 
 def functionalTest = tasks.register('functionalTest', Test) {
@@ -35,4 +45,12 @@ def functionalTest = tasks.register('functionalTest', Test) {
     dependsOn tasks.named('assemble')
 //    mustRunAfter tasks.named('assemble')
     workingDir = file("$buildDir/distribution")
+
+    def inputFile = new File(interlokServiceTestDefinition)
+    if (inputFile.exists()) {
+        if (interlokServiceTest) interlokServiceTest.enabled = true
+        if (interlokServiceTestReport) interlokServiceTestReport.enabled = true
+        if (interlokVerifyConfigCheck) interlokVerifyConfigCheck.enabled = true
+        dependsOn tasks.named("interlokServiceTest")
+    }
 }
