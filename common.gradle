@@ -30,6 +30,9 @@ def functionalTest = tasks.register('functionalTest', Test) {
     if (interlokServiceTest) interlokServiceTest.enabled = false
     if (interlokServiceTestReport) interlokServiceTestReport.enabled = false
     if (interlokVerifyConfigCheck) interlokVerifyConfigCheck.enabled = false
-    dependsOn tasks.named('build')
+    dependsOn tasks.named('installDist')
+//    mustRunAfter tasks.named('installDist')
+    dependsOn tasks.named('assemble')
+//    mustRunAfter tasks.named('assemble')
     workingDir = file("$buildDir/distribution")
 }
