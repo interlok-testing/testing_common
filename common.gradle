@@ -1,6 +1,6 @@
 ext {
     interlokParentGradle = "https://raw.githubusercontent.com/adaptris/interlok-build-parent/main/v5/build.gradle"
-    interlokVersion = '5.0.5B1-RELEASE'
+    interlokVersion = '5.0-SNAPSHOT'
     // Include the WAR file since by default it is excluded.
     includeWar='true'
     junitJupiterVersion = '5.11.4'
