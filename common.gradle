@@ -24,9 +24,9 @@ dependencies {
     implementation ("org.apache.httpcomponents.client5:httpclient5-testing:$apacheHttpComponentsClientVersion")
     implementation "org.testcontainers:testcontainers:$testContainersVersion"
     implementation "org.testcontainers:junit-jupiter:$testContainersVersion"
-    implementation "com.adaptris:interlok-service-tester:$interlokServiceTesterVersion"
+    interlokTestRuntime "com.adaptris:interlok-service-tester:$interlokServiceTesterVersion"
     compileOnly group: "com.adaptris.license", name: "interlok-license-generator", version: "$interlokLicenseGeneratorVersion"
-    implementation fileTree(dir: "$buildDir/distribution/lib", include: ['*.jar'])
+    testImplementation fileTree(dir: "$buildDir/distribution/lib", include: ['*.jar'])
     testImplementation group: "com.adaptris", name: "interlok-testing-common", version: "$interlokTestingVersion"
 }
 
