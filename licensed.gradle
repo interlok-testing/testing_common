@@ -1,41 +1,14 @@
-ext {
-    interlokLicenseGeneratorCloneDir = "${buildDir}/interlok-license-generator"
-    interlokLicenseGeneratorRepo = 'git@gitlab.proagrica-tooling.dev:interlok/proagrica-network/interlok-license/generator.git'
-    cloneLicenseGeneratorClosure = {
-        def cloneDir = new File(interlokLicenseGeneratorCloneDir)
-        if (!cloneDir.exists()) {
-            repository = interlokLicenseGeneratorRepo
-            directory = cloneDir
-        } else it.enabled = false
+def saveLicenseFile = tasks.register('saveLicenseFile') {
+    doLast {
+        def outputFile = file("$buildDir/distribution/config/license.properties")
+        outputFile.write("adp.license.key=${project.license}")
     }
 }
 
-tasks.named("assemble") {
-    dependsOn("buildLicenseGeneratorIfNeeded")
-}
-
-def buildLicenseGeneratorIfNeeded = tasks.register("buildLicenseGeneratorIfNeeded") {
-    def testConfigs = configurations.findAll {
-        ["testRuntime", "testImplementation"].contains(it.name)
+tasks.named('functionalTest') {
+    if (project.hasProperty('license') && project.license) {
+        dependsOn tasks.named('saveLicenseFile')
+        mustRunAfter('installDist')
     }
-    if (project.tasks.named('cloneLicenseGeneratorRepo').present) {
-        if (testConfigs.allDependencies.flatten().find { it.group == 'com.adaptris.license' && it.name == 'interlok-license-generator'}) {
-            it.finalizedBy(["cloneLicenseGeneratorRepo", "buildLicenseGenerator"])
-        }
-    } else {
-        enabled = false
-    }
-}
-
-def buildLicenseGenerator = tasks.register("buildLicenseGenerator", GradleBuild) {
-    dir = new File(interlokLicenseGeneratorCloneDir)
-    tasks = ["publishToMavenLocal"]
-    if (project.tasks.named('cloneLicenseGeneratorRepo').present) {
-        mustRunAfter("cloneLicenseGeneratorRepo")
-    }
-}
-
-dependencies {
-    implementation group: "com.adaptris.license", name: "interlok-license-generator", version: "$interlokLicenseGeneratorVersion"
-    testImplementation group: "com.adaptris.license", name: "interlok-license-generator", version: "$interlokLicenseGeneratorVersion"
+    systemProperty 'adp.license.location', 'config/license.properties'
 }
