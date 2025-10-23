@@ -25,7 +25,6 @@ dependencies {
     implementation "org.testcontainers:testcontainers:$testContainersVersion"
     implementation "org.testcontainers:junit-jupiter:$testContainersVersion"
     interlokTestRuntime "com.adaptris:interlok-service-tester:$interlokServiceTesterVersion"
-    compileOnly group: "com.adaptris.license", name: "interlok-license-generator", version: "$interlokLicenseGeneratorVersion"
     testImplementation fileTree(dir: "$buildDir/distribution/lib", include: ['*.jar'])
     testImplementation group: "com.adaptris", name: "interlok-testing-common", version: "$interlokTestingVersion"
 }
