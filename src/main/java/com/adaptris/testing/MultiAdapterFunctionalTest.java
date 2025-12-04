@@ -51,7 +51,7 @@ public abstract class MultiAdapterFunctionalTest extends AbstractAdapterFunction
                         synchronized (ctr) {
                             withReservedSocket(serverSocket -> {
                                 try {
-                                    setupAdapter(instance, serverSocket, false);
+                                    setupAdapter(instance, serverSocket);
                                 } catch (Exception e) {
                                     throw new RuntimeException(e);
                                 }
@@ -75,12 +75,9 @@ public abstract class MultiAdapterFunctionalTest extends AbstractAdapterFunction
         if (client != null) client.close();
         shutdownAdapter();
     }
-    protected void setupAdapter(AdapterInstance instance, ServerSocket serverSocket, boolean withLicense) throws Exception {
+    protected void setupAdapter(AdapterInstance instance, ServerSocket serverSocket) throws Exception {
         Integer serverPort = serverSocket.getLocalPort();
         instance.setServerPort(serverPort);
-        if (withLicense) {
-            instance.withLicense();
-        }
 
         instance.customiseBootstrap(customiseBootstrap(instance, new Properties()));
         instance.customiseVariables(customiseVariables(instance, new Properties()));

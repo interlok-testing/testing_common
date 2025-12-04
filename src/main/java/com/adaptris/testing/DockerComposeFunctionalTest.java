@@ -6,6 +6,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.containers.ComposeContainer;
 
 import java.net.InetSocketAddress;
+import java.util.Properties;
 
 /**
  * This class uses the TestContainers library to setup a JUnit test case according to a docker compose
@@ -19,6 +20,8 @@ public abstract class DockerComposeFunctionalTest extends AbstractAdapterFunctio
 
     @BeforeAll
     public void setup() throws Exception {
+        this.setupBootstrap();
+        this.setupVariables();
         this.environment = setupContainers();
         this.environment.start();
     }
@@ -30,6 +33,27 @@ public abstract class DockerComposeFunctionalTest extends AbstractAdapterFunctio
         }
     }
 
+    @Override
+    protected void customiseBootstrapPropertiesAfterStore(Properties props) {
+        super.customiseBootstrapProperties(props);
+        props.stringPropertyNames().forEach(key -> {
+            if (key.startsWith("variable-substitution.properties.url")) {
+                String val = props.getProperty(key);
+                String newVal = val.replaceAll("\\./", "./build/distribution/");
+                props.setProperty(key, newVal);
+            }
+        });
+    }
+
+    @Override
+    protected String resolveVariablesLocation() {
+        return "./build/distribution/config/variables.properties";
+    }
+
+    @Override
+    protected String resolveBootstrapLocation() {
+        return "./build/distribution/config/bootstrap.properties";
+    }
 
     protected InetSocketAddress getHostAddressForService(String serviceName, int port) {
         return new InetSocketAddress(environment.getServiceHost(serviceName, port), environment.getServicePort(serviceName, port));
