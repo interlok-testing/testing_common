@@ -1,16 +1,20 @@
+apply plugin: "maven-publish"
+
 ext {
     interlokParentGradle = "https://raw.githubusercontent.com/adaptris/interlok-build-parent/main/v5/build.gradle"
     interlokVersion = '5.1-SNAPSHOT'
     interlokServiceTesterVersion = '5.0-SNAPSHOT'
-    interlokTestingVersion = "0.1"
+    interlokTestingVersion = "0.2"
     // Include the WAR file since by default it is excluded.
     includeWar='true'
     junitJupiterVersion = '5.11.4'
     apacheHttpComponentsVersion = '5.3.3'
     apacheHttpComponentsClientVersion = '5.1.4'
-    testContainersVersion = "1.20.4"
+    testContainersVersion = "2.0.2"
     interlokLicenseGeneratorVersion = "0.1"
 }
+
+version interlokTestingVersion
 
 allprojects {
     apply from: "${interlokParentGradle}"
@@ -23,7 +27,8 @@ dependencies {
     implementation ("org.apache.httpcomponents.client5:httpclient5:$apacheHttpComponentsClientVersion")
     implementation ("org.apache.httpcomponents.client5:httpclient5-testing:$apacheHttpComponentsClientVersion")
     implementation "org.testcontainers:testcontainers:$testContainersVersion"
-    implementation "org.testcontainers:junit-jupiter:$testContainersVersion"
+    implementation "org.testcontainers:testcontainers-junit-jupiter:$testContainersVersion"
+    implementation fileTree(dir: "$buildDir/distribution/lib", include: ['*.jar'])
     interlokTestRuntime "com.adaptris:interlok-service-tester:$interlokServiceTesterVersion"
     testImplementation fileTree(dir: "$buildDir/distribution/lib", include: ['*.jar'])
     testImplementation group: "com.adaptris", name: "interlok-testing-common", version: "$interlokTestingVersion"

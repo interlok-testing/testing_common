@@ -6,8 +6,6 @@ import com.adaptris.core.fs.FsHelper;
 import com.adaptris.core.runtime.AdapterManagerMBean;
 import com.adaptris.core.runtime.AdapterRegistryMBean;
 import com.adaptris.interlok.boot.InterlokLauncher;
-import com.adaptris.util.license.LicenseCreatorFactory;
-import org.apache.commons.io.FileUtils;
 
 import javax.management.JMX;
 import javax.management.ObjectInstance;
@@ -16,9 +14,6 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.*;
 
 public class AdapterInstance {
@@ -240,23 +235,8 @@ public class AdapterInstance {
         }
     }
 
-    public AdapterInstance withLicense() throws Exception {
-        return withLicense("Enterprise");
-    }
-
     public AdapterInstance withFailover() throws Exception {
         this.isFailover = true;
-        return this;
-    }
-
-    public AdapterInstance withLicense(String type) throws Exception {
-        Map<String, Object> config = Map.of("expiryDate", LocalDate.now().plusDays(1), "type", type);
-        String license = LicenseCreatorFactory.getCreator(config).create();
-        licenseFile = Paths.get("config/license.properties").toFile();
-        if (licenseFile.exists()) {
-            licenseFile.delete();
-        }
-        FileUtils.writeStringToFile(licenseFile, "adp.license.key=" + license, Charset.defaultCharset());
         return this;
     }
 

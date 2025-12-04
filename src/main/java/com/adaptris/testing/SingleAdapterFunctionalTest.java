@@ -61,6 +61,14 @@ public class SingleAdapterFunctionalTest extends AbstractAdapterFunctionalTest {
     }
     protected void setupAdapter(ServerSocket serverSocket) {
         serverPort = serverSocket.getLocalPort();
+        setupBootstrap();
+        setupVariables();
+    }
+
+
+
+    @Override
+    protected void setupBootstrap() {
         File bootstrapFile = new File("./config/bootstrap.properties");
         assert bootstrapFile.exists() : "Bootstrap file does not exist: " + bootstrapFile.getAbsolutePath();
         Properties bootstrapProperties = new Properties();
@@ -78,28 +86,22 @@ public class SingleAdapterFunctionalTest extends AbstractAdapterFunctionalTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        File variablesFile = new File("./config/variables.properties");
-        if (variablesFile.exists()) {
-            Properties variablesProperties = new Properties();
-            try (InputStream is = new FileInputStream(variablesFile)) {
-                variablesProperties.load(is);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            customiseVariablesIfExists(variablesProperties);
-            try (OutputStream os = new FileOutputStream(variablesFile)) {
-                variablesProperties.store(os, null);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
+    @Override
     protected void customiseBootstrapProperties(Properties props) {
+        super.customiseBootstrapProperties(props);
+        String jmxServiceUrlStr = props.getProperty("jmxserviceurl", null);
+        assert jmxServiceUrlStr != null : "Bootstrap file must have jmxserviceurl property";
+        try {
+            jmxServiceUrl = new JMXServiceURL(jmxServiceUrlStr);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
         props.put("webServerPort", String.valueOf(serverPort));
     }
 
+    @Override
     protected void customiseVariablesIfExists(Properties props) {
         props.put("sysprop.jetty.http.port", String.valueOf(serverPort));
     }
